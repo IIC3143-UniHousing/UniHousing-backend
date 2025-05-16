@@ -73,7 +73,7 @@ test('should return error if user exists', async () => {
   });
 });
 
-test('should return error if email is not from uc.cl', async () => {
+test('should return error if email is not from uc.cl and user is student', async () => {
   const user = {
     body: {
       email: 'test@example.com',

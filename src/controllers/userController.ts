@@ -14,7 +14,7 @@ export const createUser = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'User already exists' });
     }
     
-    if (!email.endsWith('@uc.cl')) {
+    if (!email.endsWith('@uc.cl') && type !== 'propietario') {
       return res.status(400).json({ message: 'Invalid email' });
     }
 
