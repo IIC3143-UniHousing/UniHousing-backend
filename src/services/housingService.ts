@@ -10,6 +10,7 @@ interface HousingFilter {
     maxRooms?: number;
     minBathrooms?: number;
     maxBathrooms?: number;
+    address?: string
 }
 
 export const filterHousing = async (filters: HousingFilter) => {
@@ -20,7 +21,8 @@ export const filterHousing = async (filters: HousingFilter) => {
         minRooms,
         maxRooms,
         minBathrooms,
-        maxBathrooms
+        maxBathrooms,
+        address
     } = filters;
 
     const where: any = {};
@@ -48,6 +50,13 @@ export const filterHousing = async (filters: HousingFilter) => {
         ...(minBathrooms && { gte: minBathrooms }),
         ...(maxBathrooms && { lte: maxBathrooms }),
       };
+    }
+
+    if (address) {
+        where.address = {
+            contains: address,
+            mode: 'insensitive'
+        };
     }
 
     return prisma.housing.findMany({
