@@ -1,5 +1,6 @@
 import userRoutes from './routes/userRoutes';
 import housingRoutes from './routes/housingRoutes';
+import s3Routes from './routes/s3Routes';
 import { Router } from 'express';
 import prisma from './prisma';
 import { Request, Response } from 'express';
@@ -8,6 +9,7 @@ const router = Router();
 
 router.use('/api/users', userRoutes);
 router.use('/api/housing', housingRoutes);
+router.use('/api/s3', s3Routes);
 
 router.get('/', (req, res) => {
     res.send('Hello from Express + TypeScript!');
