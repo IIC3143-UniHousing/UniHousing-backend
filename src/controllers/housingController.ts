@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import prisma from '../prisma';
+import housingService from '../services/housingService';
 
 export const createHousing = async (req: Request, res: Response) => {
   try {
@@ -134,25 +135,17 @@ export const deleteHousing = async (req: Request, res: Response) => {
 
 export const listHousing = async (req: Request, res: Response) => {
   try {
-    const { available } = req.query;
+    const filters = {
+      available: req.query.available === 'true',
+      minPrice: req.query.minPrice ? parseFloat(req.query.minPrice as string) : undefined,
+      maxPrice: req.query.maxPrice ? parseFloat(req.query.maxPrice as string) : undefined,
+      minRooms: req.query.minRooms ? parseInt(req.query.minRooms as string) : undefined,
+      maxRooms: req.query.maxRooms ? parseInt(req.query.maxRooms as string) : undefined,
+      minBathrooms: req.query.minBathrooms ? parseInt(req.query.minBathrooms as string) : undefined,
+      maxBathrooms: req.query.maxBathrooms ? parseInt(req.query.maxBathrooms as string) : undefined
+    };
 
-    const where = available ? { available: available === 'true' } : {};
-
-    const housing = await prisma.housing.findMany({
-      where,
-      include: {
-        owner: {
-          select: {
-            id: true,
-            name: true,
-            email: true
-          }
-        }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    });
+    const housing = await housingService.filterHousing(filters);
 
     res.status(200).json({ housing });
   } catch (error) {
