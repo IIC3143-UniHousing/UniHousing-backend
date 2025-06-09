@@ -74,7 +74,8 @@ export const login = async (req: Request, res: Response) => {
       client_id: AUTH0_CLIENT_ID,
       client_secret: AUTH0_CLIENT_SECRET,
       scope: 'openid profile email',
-      connection: 'Username-Password-Authentication'
+      connection: 'Username-Password-Authentication',
+      audience: process.env.AUTH0_AUDIENCE
     });
 
     const { access_token, id_token } = token.data;
