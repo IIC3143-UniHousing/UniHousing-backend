@@ -15,5 +15,33 @@ datasource db {
 }
 
 model User {
-  id Int @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
+  auth0Id   String    @unique
+  name      String
+  email     String    @unique
+  type      UserType
+  createdAt DateTime  @default(now())
+  housing   Housing[] @relation("owner")
+}
+
+model Housing {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  address     String
+  price       Float
+  rooms       Int
+  bathrooms   Int
+  size        Float
+  images      String[]
+  owner       User     @relation("owner", fields: [ownerId], references: [id])
+  ownerId     Int
+  available   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum UserType {
+  estudiante
+  propietario
 }
