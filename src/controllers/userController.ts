@@ -15,7 +15,7 @@ export const createUser = async (req: Request, res: Response) => {
     const { email, name, password, type } = req.body;
 
     if (!email.endsWith('@uc.cl') && type !== 'propietario') {
-      return res.status(400).json({ message: 'Invalid email' });
+      return res.status(400).json({ error: 'Correo electrónico no autorizado para estudiante, debes ingresar un correo UC.' });
     }
 
     const mgmtTokenResponse = await axios.post(`https://${AUTH0_DOMAIN}/oauth/token`, {
@@ -58,7 +58,7 @@ export const createUser = async (req: Request, res: Response) => {
   } catch (error: any) {
     const auth0Message = error.response?.data.message || error.response?.data.error_description;
     const translated = translateAuth0Error(auth0Message);
-    console.error('Error creating user with Auth0:', error.response?.data || error.message);
+    console.error('Error al crear un usuario con auth0:', error.response?.data || error.message);
     res.status(400).json({ error: translated });
   }
 };
@@ -97,14 +97,14 @@ export const login = async (req: Request, res: Response) => {
     });
 
     if (!user) {
-      return res.status(401).json({ message: 'Usuario no encontrado en la base de datos' });
+      return res.status(401).json({ error: 'Usuario no encontrado en la base de datos' });
     }
 
     res.status(200).json({ access_token, id_token, user });
   } catch (error: any) {
     const auth0Message = error.response?.data.message || error.response?.data.error_description;
     const translated = translateAuth0Error(auth0Message);
-    console.error('Error logging in with Auth0:', error.response?.data || error.message);
+    console.error('Error login with Auth0:', error.response?.data || error.message);
     res.status(401).json({ error: translated });
   }
 };
@@ -120,7 +120,7 @@ export const updateUser = async (req: Request, res: Response) => {
     });
 
     if (!existingUser) {
-      return res.status(400).json({ message: 'User does not exist' });
+      return res.status(400).json({ error: 'El usuario no existe.' });
     }
 
     const user = await prisma.user.update({
@@ -135,6 +135,6 @@ export const updateUser = async (req: Request, res: Response) => {
     res.status(200).json({ user });
   } catch (error) {
     console.error('Error updating user:', error);
-    res.status(500).json({ message: 'Error updating user' });
+    res.status(500).json({ error: 'Error al modificar el usuario.' });
   }
 };
