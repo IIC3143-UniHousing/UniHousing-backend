@@ -104,7 +104,7 @@ export const login = async (req: Request, res: Response) => {
   } catch (error: any) {
     const auth0Message = error.response?.data.message || error.response?.data.error_description;
     const translated = translateAuth0Error(auth0Message);
-    console.error('Error login with Auth0:', error.response?.data || error.message);
+    console.error('Error al iniciar sesión con Auth0:', error.response?.data || error.message);
     res.status(401).json({ error: translated });
   }
 };
@@ -134,7 +134,7 @@ export const updateUser = async (req: Request, res: Response) => {
 
     res.status(200).json({ user });
   } catch (error) {
-    console.error('Error updating user:', error);
+    console.error('Error al actualizar el usuario:', error);
     res.status(500).json({ error: 'Error al modificar el usuario.' });
   }
 };
