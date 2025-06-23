@@ -160,3 +160,29 @@ export const listHousing = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Error listing housing' });
   }
 };
+
+export const isRecentHousing = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    
+    const housing = await prisma.housing.findUnique({
+      where: { id: parseInt(id) }
+    });
+
+    if (!housing) {
+      return res.status(404).json({ message: 'Housing not found' });
+    }
+
+    // Calculate if the housing was created within the last 30 minutes
+    const now = new Date();
+    const createdAt = new Date(housing.createdAt);
+    const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000);
+    
+    const isRecent = createdAt >= thirtyMinutesAgo;
+
+    res.status(200).json({ isRecent });
+  } catch (error) {
+    console.error('Error checking if housing is recent:', error);
+    res.status(500).json({ message: 'Error checking if housing is recent' });
+  }
+};
