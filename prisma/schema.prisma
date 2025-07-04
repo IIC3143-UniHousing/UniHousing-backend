@@ -29,6 +29,8 @@ model Housing {
   title       String
   description String
   address     String
+  latitude  Float
+  longitude Float
   price       Float
   rooms       Int
   bathrooms   Int
