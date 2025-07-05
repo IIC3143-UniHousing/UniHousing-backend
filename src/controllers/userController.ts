@@ -120,7 +120,8 @@ export const updateUser = async (req: Request, res: Response) => {
     });
 
     if (!existingUser) {
-      return res.status(400).json({ error: 'El usuario no existe.' });
+      res.status(400).json({ error: 'El usuario no existe.' });
+      return;
     }
 
     const user = await prisma.user.update({
@@ -136,5 +137,32 @@ export const updateUser = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error al actualizar el usuario:', error);
     res.status(500).json({ error: 'Error al modificar el usuario.' });
+  }
+};
+
+export const getUser = async (req: Request, res: Response) => {
+  try {
+    console.log("Auth info:", (req as any).auth);
+    const auth0Id = (req as any).auth?.sub;
+    console.log("Auth0 ID extraído del token:", auth0Id)
+
+    if (!auth0Id) {
+      res.status(401).json({ error: 'No autorizado' });
+      return;
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { auth0Id }
+    });
+
+    if (!user) {
+      res.status(404).json({ error: 'Usuario no encontrado' });
+      return;
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.error('Error al obtener el usuario:', error);
+    res.status(500).json({ error: 'Error al obtener el usuario' });
   }
 };
