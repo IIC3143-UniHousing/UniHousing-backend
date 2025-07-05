@@ -163,6 +163,8 @@ export const getUser = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error al obtener el usuario:', error);
     res.status(500).json({ error: 'Error al obtener el usuario' });
+    }
+  };
 
 export const deleteUser = async (req: Request, res: Response) => {
   try {
