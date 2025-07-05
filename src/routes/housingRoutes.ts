@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { createHousing, getHousing, updateHousing, deleteHousing, listHousing } from '../controllers/housingController';
+import { createHousing, getHousing, updateHousing, deleteHousing, listHousing, isRecentHousing } from '../controllers/housingController';
 
 const router = Router();
 
@@ -192,5 +192,38 @@ router.delete('/:id', async (req: Request, res: Response) => {
  *         description: Server error
  */
 router.get('/', listHousing);
+
+/**
+ * @swagger
+ * /api/housing/{id}/recent:
+ *   get:
+ *     summary: Check if housing was created in the past half hour
+ *     tags: [Housing]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the housing to check
+ *     responses:
+ *       200:
+ *         description: Success
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 isRecent:
+ *                   type: boolean
+ *                   description: Whether the housing was created in the past 30 minutes
+ *       404:
+ *         description: Housing not found
+ *       500:
+ *         description: Server error
+ */
+router.get('/:id/recent', async (req: Request, res: Response) => {
+  await isRecentHousing(req, res);
+});
 
 export default router;

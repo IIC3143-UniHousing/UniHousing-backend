@@ -50,7 +50,7 @@ export const createUser = async (req: Request, res: Response) => {
         auth0Id: auth0User.user_id,
         email: auth0User.email,
         name: auth0User.name,
-        type: type as UserType
+        type: type as UserType,
       }
     });
 
@@ -99,7 +99,6 @@ export const login = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(401).json({ error: 'Usuario no encontrado en la base de datos' });
     }
-
     res.status(200).json({ access_token, id_token, user });
   } catch (error: any) {
     const auth0Message = error.response?.data.message || error.response?.data.error_description;
@@ -164,5 +163,39 @@ export const getUser = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error al obtener el usuario:', error);
     res.status(500).json({ error: 'Error al obtener el usuario' });
+
+export const deleteUser = async (req: Request, res: Response) => {
+  try {
+    const { auth0Id } = req.body;
+    
+    
+    const mgmtTokenResponse = await axios.post(`https://${AUTH0_DOMAIN}/oauth/token`, {
+      client_id: AUTH0_MGMT_CLIENT_ID,
+      client_secret: AUTH0_MGMT_CLIENT_SECRET,
+      audience: `https://${AUTH0_DOMAIN}/api/v2/`,
+      grant_type: 'client_credentials'
+    });
+
+    const mgmtToken = mgmtTokenResponse.data.access_token;
+    
+    const deleteUserResponse = await axios.delete(
+      `https://${AUTH0_DOMAIN}/api/v2/users/${auth0Id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${mgmtToken}`
+        }
+      }
+    );
+
+    
+
+    const user = await prisma.user.delete({
+      where: { auth0Id }
+    });
+
+    res.status(200).json({ user });
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    res.status(500).json({ message: 'Error deleting user' });
   }
 };
