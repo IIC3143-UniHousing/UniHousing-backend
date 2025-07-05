@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
-import { createUser, login } from '../controllers/userController';
+import { createUser, login, updateUser, getUser } from '../controllers/userController';
+import { authenticateToken } from '../middlewares/authMiddleware';
 
 const router = Router();
 
@@ -73,5 +74,10 @@ router.post('/register', async (req: Request, res: Response) => {
 router.post('/login', async (req: Request, res: Response) => {
   await login(req, res);
 });
+
+router.get('/me', authenticateToken, getUser);
+
+router.put('/me', authenticateToken, updateUser);
+
 
 export default router;
