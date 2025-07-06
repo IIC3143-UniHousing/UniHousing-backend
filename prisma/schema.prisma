@@ -22,6 +22,7 @@ model User {
   type      UserType
   createdAt DateTime  @default(now())
   housing   Housing[] @relation("owner")
+  reviews   Review[]  @relation("reviewer")
 }
 
 model Housing {
@@ -29,6 +30,8 @@ model Housing {
   title       String
   description String
   address     String
+  latitude  Float
+  longitude Float
   price       Float
   rooms       Int
   bathrooms   Int
@@ -39,9 +42,21 @@ model Housing {
   available   Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  reviews     Review[] @relation("housing")
 }
 
 enum UserType {
   estudiante
   propietario
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation("reviewer", fields: [userId], references: [id])
+  userId    Int
+  housing   Housing  @relation("housing", fields: [housingId], references: [id])
+  housingId Int
+  score     Int
+  comment   String
+  date      DateTime @default(now())
 }

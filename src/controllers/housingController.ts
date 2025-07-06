@@ -1,5 +1,23 @@
 import { Request, Response } from 'express';
 import prisma from '../prisma';
+import fetch from 'node-fetch';
+
+interface NominatimResponse {
+  lat: string;
+  lon: string;
+}
+
+const geocodeAddress = async (address: string) => {
+  const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json`, {
+    headers: { 'User-Agent': 'UniHousing/1.0 (email@ejemplo.com)' } 
+  });
+  const data = await response.json() as NominatimResponse[];
+  if (data.length === 0) throw new Error('Dirección no válida');
+  return {
+    lat: parseFloat(data[0].lat),
+    lon: parseFloat(data[0].lon)
+  };
+};
 
 export const createHousing = async (req: Request, res: Response) => {
   try {
@@ -15,11 +33,24 @@ export const createHousing = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Invalid owner' });
     }
 
+    let lat: number;
+    let lon: number;
+
+    try {
+      const coords = await geocodeAddress(address);
+      lat = coords.lat;
+      lon = coords.lon;
+    } catch (error) {
+      return res.status(400).json({ message: 'Dirección no válida o no encontrada' });
+    }
+
     const housing = await prisma.housing.create({
       data: {
         title,
         description,
         address,
+        latitude: lat,
+        longitude: lon,
         price: parseFloat(price),
         rooms: parseInt(rooms),
         bathrooms: parseInt(bathrooms),
@@ -158,5 +189,31 @@ export const listHousing = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error listing housing:', error);
     res.status(500).json({ message: 'Error listing housing' });
+  }
+};
+
+export const isRecentHousing = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    
+    const housing = await prisma.housing.findUnique({
+      where: { id: parseInt(id) }
+    });
+
+    if (!housing) {
+      return res.status(404).json({ message: 'Housing not found' });
+    }
+
+    // Calculate if the housing was created within the last 30 minutes
+    const now = new Date();
+    const createdAt = new Date(housing.createdAt);
+    const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000);
+    
+    const isRecent = createdAt >= thirtyMinutesAgo;
+
+    res.status(200).json({ isRecent });
+  } catch (error) {
+    console.error('Error checking if housing is recent:', error);
+    res.status(500).json({ message: 'Error checking if housing is recent' });
   }
 };
