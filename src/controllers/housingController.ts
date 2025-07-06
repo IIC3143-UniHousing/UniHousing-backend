@@ -152,6 +152,10 @@ export const deleteHousing = async (req: Request, res: Response) => {
       return res.status(403).json({ message: 'Not authorized' });
     }
 
+    await prisma.review.deleteMany({
+      where: { housingId: parseInt(id) }
+    });
+
     await prisma.housing.delete({
       where: { id: parseInt(id) }
     });
